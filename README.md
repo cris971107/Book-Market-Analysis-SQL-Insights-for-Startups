@@ -52,9 +52,7 @@ Clean and filter raw metadata (such as page counts and minimum rating thresholds
 ```
 [project-root]/
 │
-├── docs/                     # Original, unmodified source data - never edited
-│
-├── notebooks/                # Jupyter, R Markdown, or Colab notebooks
+└── notebooks/                # Jupyter, R Markdown, or Colab notebooks
 │
 └── visuals/                  # Exported charts, dashboard screenshots, ERD diagrams
 
