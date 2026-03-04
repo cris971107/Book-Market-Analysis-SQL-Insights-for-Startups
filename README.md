@@ -1,15 +1,16 @@
 # A/B Test Analysis
-Analyzed the performance of a new recommendation engine through an A/B test to determine if it significantly improved user conversion across the sales funnel.
+This project analyzes a comprehensive database of books, authors, publishers, and user reviews. The goal is to extract key market insights to help a startup develop a unique value proposition for a new book-related application.
+
 ---
 
 ## ⚙️ Project Type Flags
 
-- [x] Exploratory Data Analysis (EDA)
+- [ ] Exploratory Data Analysis (EDA)
 - [x] SQL Analysis / Querying
-- [x] Dashboard / Data Visualization
+- [ ] Dashboard / Data Visualization
 - [ ] Data Pipeline / ETL
 - [ ] Predictive Modelling / Machine Learning
-- [ ] Data Cleaning / Wrangling
+- [x] Data Cleaning / Wrangling
 - [ ] End-to-End (multiple of the above)
 - [ ] Other: ___________
 
@@ -29,20 +30,20 @@ Analyzed the performance of a new recommendation engine through an A/B test to d
 
 ## 1. Project Overview
 
-This report summarizes the statistical evaluation of an A/B test conducted to measure the impact of a new recommendation system on user behavior. By leveraging detailed event logs and user data, the analysis identifies whether the proposed changes successfully optimized the purchasing funnel or adversely affected the user experience.
+This project involves the analysis of an A/B test conducted on an e-commerce platform to determine if a new landing page design (Test Group) leads to a statistically significant increase in conversion rates compared to the existing design (Control Group). The study focuses on user behavior metrics and statistical validation to drive data-informed product decisions.
 
 ---
 
 ## 2. Objectives
 
 Primary Objective:
-Compare the conversion rates and activity levels of the control group (System A) against the test group (System B).
+Analyze the competitive landscape of the digital book market by querying a relational database to identify popular trends in publishing and user engagement.
 
 Secondary Objective 1:
-Utilize hypothesis testing (z-tests) to determine if observed differences are statistically significant or merely due to random chance.
+Assess the quality and reception of literary works through the aggregation of user ratings and text-based reviews to determine market "favorites."
 
 Secondary Objective 2:
-Clean and process raw interaction data to ensure metrics such as total event sums and counts are accurate for final evaluation.
+Clean and filter raw metadata (such as page counts and minimum rating thresholds) to ensure that the analysis focuses on significant publications rather than brochures or low-engagement titles.
 
 ---
 
@@ -68,24 +69,69 @@ Clean and process raw interaction data to ensure metrics such as total event sum
 
 ## 4. Data processing and methodology
 
-The analysis utilized a refined dataset, referred to in the code as res_clean, which aggregated user interactions.
+The project was executed in a Jupyter Notebook using Python (Pandas) and SQLAlchemy to interact with a PostgreSQL database hosted on AWS RDS.
 
-Metric Definition: The core metrics focused on the total sum of events (sum) and the frequency of interactions (count) per unique user.
+Key SQL Implementations:
+1. Filtering by Publication Date:
+To understand the modern market, I identified books published after the millennial turn.
 
-Refinement Logic: Data was processed to eliminate outliers and ensure that only relevant events within the experimental window were included in the final z-test.
+```SQL
+SELECT COUNT(book_id) AS total_libros_recientes
+FROM books
+WHERE publication_date > '2000-01-01';
+```
 
-# Methods Used
+2. Multi-Table Aggregation:
+Used LEFT JOIN to consolidate reviews and ratings per title without losing data on unreviewed books.
 
-Descriptive statistics for event distribution per user.
+```SQL
+SELECT b.title, COUNT(DISTINCT rev.review_id) AS total_reseñas, AVG(rat.rating) AS calificacion_promedio
+FROM books AS b
+LEFT JOIN reviews AS rev ON b.book_id = rev.book_id
+LEFT JOIN ratings AS rat ON b.book_id = rat.book_id
+GROUP BY b.book_id, b.title;
+```
 
-Funnel analysis (Login -> Product Page -> Cart -> Purchase).
+3. Quality Threshold Filtering:
+Identified top publishers by focusing only on full-length publications (>50 pages).
 
-Z-test for independent proportions (Alpha = 0.05).
+```SQL
+SELECT p.publisher, COUNT(b.book_id) AS total_libros
+FROM publishers AS p
+JOIN books AS b ON p.publisher_id = b.publisher_id
+WHERE b.num_pages > 50
+GROUP BY p.publisher_id, p.publisher
+ORDER BY total_libros DESC LIMIT 5;
+```
 
-`visuals/Captura de pantalla 2026-03-04 000520.png`
+4. Subqueries for Statistical Significance:
+Isolated authors with high average ratings, but only for books with at least 50 user ratings to ensure data reliability.
 
+```SQL
+SELECT a.author, AVG(rat.rating) AS avg_rating
+FROM authors AS a
+JOIN books AS b ON a.author_id = b.author_id
+JOIN ratings AS rat ON b.book_id = rat.book_id
+WHERE b.book_id IN (SELECT book_id FROM ratings GROUP BY book_id HAVING COUNT(rating_id) >= 50)
+GROUP BY a.author_id, a.author
+ORDER BY avg_rating DESC LIMIT 5;
+```
 
-<img width="1237" height="347" alt="Captura de pantalla 2026-03-04 000520" src="https://github.com/user-attachments/assets/099547b0-04fa-453f-9509-09ed71cd0560" />
+5. CTEs for User Behavior Analysis:
+Used Common Table Expressions to profile "Super-Users" and analyze their specific review habits.
+
+```SQL
+WITH super_usuarios AS (
+    SELECT username FROM ratings GROUP BY username HAVING COUNT(book_id) > 50
+)
+SELECT AVG(conteo_reseñas) AS promedio_reseñas_texto
+FROM (
+    SELECT username, COUNT(review_id) AS conteo_reseñas
+    FROM reviews
+    WHERE username IN (SELECT username FROM super_usuarios)
+    GROUP BY username
+) AS subconsulta;
+```
 
 ---
 
@@ -110,14 +156,13 @@ Z-test for independent proportions (Alpha = 0.05).
   Aim for 3–6 insights. Quality over quantity.
 -->
 
-The data revealed a clear trend regarding the experimental group:
+Modern Market Relevance: Query 1 confirmed a robust post-2000 catalog, ensuring findings align with current consumer preferences.
 
-Performance Degradation: The new system did not just fail to improve metrics; it actively worsened the user experience or the efficiency of the purchase funnel.
+Content Quality Filtering: By isolating books with more than 50 pages (Query 3), we identified the top 5 publishers that lead the professional market, excluding minor publications.
 
-Statistical Confidence: The p-value decreased slightly during the final stages of analysis. In statistical terms, a lower p-value strengthens the rejection of the null hypothesis, confirming that the negative impact observed was not a random fluke but a consistent result of the new system.
+Reliable Author Rankings: Using a 50-rating threshold (Query 4) eliminated statistical noise, identifying authors with genuine community prestige.
 
-`visuals/Captura de pantalla 2026-03-03 234335.png`
-<img width="1013" height="541" alt="Captura de pantalla 2026-03-03 234335" src="https://github.com/user-attachments/assets/2779e75f-c676-41e7-954f-43ae299933a9" />
+"Super-User" Profiling: The CTE analysis (Query 5) revealed a crucial behavioral pattern: users who rate more than 50 books (the most active readers) do not always provide long-form text reviews. This allows us to distinguish between "Express Critics" (quick scorers) and "Detailed Reviewers" (content contributors), which is vital for building a community-driven platform.
 
 ---
 
@@ -126,7 +171,7 @@ Statistical Confidence: The p-value decreased slightly during the final stages o
 
 | Deliverable | Description | Location |
 |-------------|-------------|----------|
-| Code | Jupyter Notebook containing EDA, Funnel Visualizations, and Z-test results. | `notebooks/Sprint-15S-2.ipynb` |
+| Code | Jupyter Notebook | `notebooks/Sprint-15S-2.ipynb` |
 
 
 
@@ -135,9 +180,13 @@ Statistical Confidence: The p-value decreased slightly during the final stages o
 
 ## 7. Final verdict and recommendations
 
-Result: The A/B test is considered a failure in terms of optimization.
+Verdict: The data demonstrates that high reading volume does not guarantee high qualitative participation. The user base is divided between mass consumers and detailed critics.
 
-Action: It is strongly recommended not to deploy the new recommendation system. Further investigation is needed to understand why the algorithm interfered with the purchase process.
+Recommendations: * Differentiated Incentives: Implement a reward system that honors "Detailed Reviewers" to encourage high-quality text content, not just high rating volume.
+
+Strategic Cataloging: Prioritize the catalogs of the top 5 publishers identified to ensure a professional and substantial launch library.
+
+Personalization: Use the high-engagement author list from Query 4 to power the "Community Recommended" engine for new users.
 
 
 ---
