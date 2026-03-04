@@ -171,7 +171,7 @@ Reliable Author Rankings: Using a 50-rating threshold (Query 4) eliminated stati
 
 | Deliverable | Description | Location |
 |-------------|-------------|----------|
-| Code | Jupyter Notebook | `notebooks/Sprint-15S-2.ipynb` |
+| Code | Jupyter Notebook | `notebooks/Sprint-15-S3 .ipynb` |
 
 
 
