@@ -1,4 +1,4 @@
-# A/B Test Analysis
+# Book-Market-Analysis-SQL-Insights-for-Startups
 This project analyzes a comprehensive database of books, authors, publishers, and user reviews. The goal is to extract key market insights to help a startup develop a unique value proposition for a new book-related application.
 
 ---
@@ -161,6 +161,8 @@ Content Quality Filtering: By isolating books with more than 50 pages (Query 3),
 Reliable Author Rankings: Using a 50-rating threshold (Query 4) eliminated statistical noise, identifying authors with genuine community prestige.
 
 "Super-User" Profiling: The CTE analysis (Query 5) revealed a crucial behavioral pattern: users who rate more than 50 books (the most active readers) do not always provide long-form text reviews. This allows us to distinguish between "Express Critics" (quick scorers) and "Detailed Reviewers" (content contributors), which is vital for building a community-driven platform.
+
+<img width="973" height="577" alt="Captura de pantalla 2026-03-04 135447" src="https://github.com/user-attachments/assets/77db9b57-c7de-4e88-a6f2-125b756c43eb" />
 
 ---
 
