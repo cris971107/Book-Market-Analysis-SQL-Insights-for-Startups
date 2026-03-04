@@ -162,6 +162,8 @@ Reliable Author Rankings: Using a 50-rating threshold (Query 4) eliminated stati
 
 "Super-User" Profiling: The CTE analysis (Query 5) revealed a crucial behavioral pattern: users who rate more than 50 books (the most active readers) do not always provide long-form text reviews. This allows us to distinguish between "Express Critics" (quick scorers) and "Detailed Reviewers" (content contributors), which is vital for building a community-driven platform.
 
+
+
 <img width="973" height="577" alt="Captura de pantalla 2026-03-04 135447" src="https://github.com/user-attachments/assets/77db9b57-c7de-4e88-a6f2-125b756c43eb" />
 
 ---
