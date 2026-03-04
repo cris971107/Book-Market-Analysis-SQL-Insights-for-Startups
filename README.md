@@ -1,4 +1,4 @@
-# Book-Market-Analysis-SQL-Insights-for-Startups
+# Book Market Analysis SQL Insights for Startups
 This project analyzes a comprehensive database of books, authors, publishers, and user reviews. The goal is to extract key market insights to help a startup develop a unique value proposition for a new book-related application.
 
 ---
